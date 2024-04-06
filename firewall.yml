@@ -1,0 +1,80 @@
+---
+# Playbook to setup a firewall on managed nodes
+
+- hosts: all
+  become: true
+  tasks:
+
+    # Tasks for Ubuntu
+    - name: Install Firewall for Ubuntu
+      ansible.builtin.apt:
+        name: ufw
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Enable UFW for Ubuntu
+      community.general.ufw:
+        state: enabled
+        policy: allow
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Allow Port 22 or SSH to the Firewall for Ubuntu
+      community.general.ufw:
+        rule: allow
+        name: OpenSSH
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Allow Port 80 or HTTP to the Firewall for Ubuntu
+      community.general.ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Allow Port 443 or HTTPS to the Firewall for Ubuntu
+      community.general.ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
+      when: ansible_distribution == "Ubuntu"
+
+    # Tasks for CentOS
+    - name: Install Firewalld for CentOS
+      ansible.builtin.yum:
+        name: firewalld
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    - name: Enable Firewalld for CentOS
+      systemd:
+        name: firewalld
+        state: started
+        enabled: true
+      when: ansible_distribution == "CentOS"
+
+    - name: Allow Port 22 or SSH to the Firewall for CentOS
+      ansible.posix.firewalld:
+        service: ssh
+        permanent: true
+        state: enabled
+      when: ansible_distribution == "CentOS"
+
+    - name: Allow Port 80 or HTTP to the Firewall for CentOS
+      ansible.posix.firewalld:
+        port: 80/tcp
+        permanent: true
+        state: enabled
+      when: ansible_distribution == "CentOS"
+
+    - name: Allow Port 443 or HTTPS to the Firewall for CentOS
+      ansible.posix.firewalld:
+        port: 443/tcp
+        permanent: true
+        state: enabled
+      when: ansible_distribution == "CentOS"
+
+    - name: Restart Firewalld to Execute Changes
+      systemd:
+        name: firewalld
+        state: reloaded
+      when: ansible_distribution == "CentOS"

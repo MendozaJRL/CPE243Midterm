@@ -1,0 +1,7 @@
+[localhost]
+
+# Managed Node - Ubuntu
+192.168.56.120	ansible_connection=ssh
+
+# Managed Node - CentOS
+192.168.56.121	ansible_connection=ssh
